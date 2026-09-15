@@ -1,0 +1,130 @@
+"use client"
+
+import Image from "next/image"
+import Link from "next/link"
+import { ArrowRight, Package, Truck, Ship, Plane, Search, Home } from "lucide-react"
+import { useScrollReveal } from "@/hooks/use-scroll-reveal"
+
+const services = [
+  {
+    icon: Search,
+    title: "Goods Sourcing",
+    description: "We source goods from verified suppliers with quality checks before shipping. Get access to trusted supplier contacts.",
+    image: "/goods-sourcing.jpeg",
+    objectPosition: "center center",
+  },
+  {
+    icon: Ship,
+    title: "Sea Freight",
+    description: "Cost-effective ocean freight solutions for bulk shipments. Safe packaging with transparent pricing.",
+    image: "https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?q=80&w=2070",
+    objectPosition: "center 60%",
+  },
+  {
+    icon: Plane,
+    title: "Air Freight",
+    description: "Fast air cargo services for time-sensitive shipments. Express delivery when you need it most.",
+    image: "/air-freight.jpg",
+    objectPosition: "center 40%",
+  },
+  {
+    icon: Package,
+    title: "Spare Parts Sourcing",
+    description: "Specialized sourcing for automotive and industrial spare parts from UAE and China.",
+    image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=2070",
+    objectPosition: "center center",
+  },
+  {
+    icon: Home,
+    title: "Door-to-Door Delivery",
+    description: "Complete end-to-end delivery service. We handle everything from pickup to final destination.",
+    image: "/door-to-door.jpg",
+    objectPosition: "center top",
+  },
+  {
+    icon: Truck,
+    title: "Free Pickups",
+    description: "We do free pickups around Sharjah and Deira, Dubai",
+    image: "/pick-up.jpg",
+    objectPosition: "center top",
+  }
+]
+
+export function ServicesOverview() {
+  const revealRef = useScrollReveal<HTMLDivElement>()
+
+  return (
+    <section className="bg-white py-20 lg:py-28">
+      <div ref={revealRef} className="max-w-7xl mx-auto px-6 lg:px-12">
+
+        {/* Section header — left-aligned editorial style */}
+        <div data-reveal className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-14">
+          <div className="max-w-2xl">
+            <p className="text-[#9333EA] text-[10px] font-black tracking-[0.22em] uppercase mb-2">
+              Our Services
+            </p>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#1B0A2E] tracking-tight leading-tight">
+              Comprehensive Freight &amp;<br className="hidden sm:block" /> Logistics Solutions
+            </h2>
+          </div>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-sm lg:text-right lg:pb-1">
+            From sourcing to delivery, we provide end-to-end cargo solutions tailored to your business needs.
+            Operating from UAE &amp; China to Zimbabwe with reliability and care.
+          </p>
+        </div>
+
+        {/* Services grid */}
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {services.map((service, i) => (
+            <div
+              key={service.title}
+              data-reveal
+              className="group relative overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-md shadow-slate-100 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-slate-200/70 transition-all duration-300"
+            >
+              {/* Image — aspect-ratio container ensures full width is used at correct proportions */}
+              <div className="relative w-full overflow-hidden" style={{ aspectRatio: "4 / 3" }}>
+                <Image
+                  src={service.image}
+                  alt={service.title}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  style={{ objectPosition: service.objectPosition }}
+                />
+
+                {/* Index number — top right */}
+                <span className="absolute top-4 right-4 font-mono text-[10px] font-bold text-white tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded-full">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
+
+              {/* Content */}
+              <div className="relative p-6">
+                {/* Icon chip */}
+                <div className="w-10 h-10 rounded-xl bg-[#1B0A2E]/08 border border-[#1B0A2E]/10 flex items-center justify-center mb-4">
+                  <service.icon className="w-5 h-5 text-[#1B0A2E]" />
+                </div>
+                <h3 className="text-base font-black text-[#1B0A2E] mb-2 tracking-tight">{service.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">{service.description}</p>
+              </div>
+
+              {/* Bottom navy accent line on hover */}
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1B0A2E] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+            </div>
+          ))}
+        </div>
+
+        {/* View all link */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full border-2 border-[#1B0A2E] text-[#1B0A2E] text-sm font-black tracking-wide hover:bg-[#1B0A2E] hover:text-white transition-all duration-200"
+          >
+            View All Services
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
