@@ -2,8 +2,9 @@ import { TRACKING_STATUSES } from '@/lib/types'
 
 const DEFAULT_TRACKING_URL = 'https://www.dxbrunnerscargo.com/tracking'
 
-export function getTrackingUrl(): string {
-  return process.env.WHATSAPP_TRACKING_URL || DEFAULT_TRACKING_URL
+export function getTrackingUrl(trackingId?: string): string {
+  const base = process.env.WHATSAPP_TRACKING_URL || DEFAULT_TRACKING_URL
+  return trackingId ? `${base}?id=${encodeURIComponent(trackingId)}` : base
 }
 
 export function getStatusLabel(status: string): string {
@@ -46,7 +47,7 @@ export function buildStatusUpdateMessage(input: StatusNotificationInput): string
   lines.push(
     '',
     `Track your shipment anytime:`,
-    getTrackingUrl(),
+    getTrackingUrl(input.trackingId),
   )
 
   return lines.join('\n')
@@ -75,7 +76,7 @@ export function buildPickupReadyMessage(input: StatusNotificationInput): string 
     '',
     `Please bring your tracking ID when collecting your goods.`,
     '',
-    `Track online: ${getTrackingUrl()}`,
+    `Track online: ${getTrackingUrl(input.trackingId)}`,
   )
 
   if (input.description) {

@@ -1,8 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import { Header } from '@/components/header'
-import { Footer } from '@/components/footer'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -10,11 +8,11 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.dxbrunnerscargo.com'), // ← your actual domain
   title: {
-    default: 'DXB Runners Cargo | Reliable Freight & Cargo Services',
+    default: 'DXB Runners Cargo | Track Your Shipment',
     template: '%s | DXB Runners Cargo',
   },
-  description: 'Professional freight and cargo services from UAE & China to Zimbabwe. Trusted sourcing, secure handling, and fast delivery. Door-to-door shipping solutions.',
-  keywords: ['freight', 'cargo', 'shipping', 'logistics', 'UAE', 'China', 'Zimbabwe', 'international shipping', 'door-to-door delivery'],
+  description: 'Track your DXB Runners Cargo shipment in real time. Fast, secure freight from UAE & China to Zimbabwe.',
+  keywords: ['track shipment', 'shipment tracking', 'freight tracking', 'cargo', 'UAE', 'China', 'Zimbabwe', 'DXB Runners Cargo'],
   alternates: {
     canonical: 'https://www.dxbrunnerscargo.com',
   },
@@ -30,8 +28,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: 'DXB Runners Cargo',
-    title: 'DXB Runners Cargo | Reliable Freight & Cargo Services',
-    description: 'Professional freight and cargo services from UAE & China to Zimbabwe. Door-to-door shipping solutions.',
+    title: 'DXB Runners Cargo | Track Your Shipment',
+    description: 'Track your DXB Runners Cargo shipment in real time. Fast, secure freight from UAE & China to Zimbabwe.',
     url: 'https://www.dxbrunnerscargo.com',
     images: [
       {
@@ -44,8 +42,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DXB Runners Cargo | Reliable Freight & Cargo Services',
-    description: 'Professional freight and cargo services from UAE & China to Zimbabwe. Door-to-door shipping solutions.',
+    title: 'DXB Runners Cargo | Track Your Shipment',
+    description: 'Track your DXB Runners Cargo shipment in real time. Fast, secure freight from UAE & China to Zimbabwe.',
     images: ['/og-image.jpg'],
   },
   icons: {
@@ -64,15 +62,7 @@ const jsonLd = {
   '@type': 'WebSite',
   name: 'DXB Runners Cargo',
   url: 'https://www.dxbrunnerscargo.com',
-  description: 'Professional freight and cargo services from UAE & China to Zimbabwe.',
-  potentialAction: {
-    '@type': 'SearchAction',
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: 'https://www.dxbrunnerscargo.com/search?q={search_term_string}',
-    },
-    'query-input': 'required name=search_term_string',
-  },
+  description: 'Track your DXB Runners Cargo shipment in real time. Fast, secure freight from UAE & China to Zimbabwe.',
 }
 
 export default function RootLayout({
@@ -87,9 +77,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Header />
-        <main>{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   )

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   Plane, Calendar, MapPin, CheckCircle2, Truck, ArrowRight,
@@ -10,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { type Package as PackageType, type PackageEvent, TRACKING_STATUSES } from '@/lib/types'
+import { useScrollReveal } from '@/hooks/use-scroll-reveal'
 import gsap from 'gsap'
 
 const WHATSAPP_LINK = "https://wa.me/971525210658"
@@ -34,7 +36,8 @@ const trackingSteps = [
   { icon: CheckCircle2, title: "Collect Your Goods", description: "Pick up your items from our Harare warehouse when ready.", num: "04" },
 ]
 
-export default function TrackingPage() {
+function TrackingPageInner() {
+  const searchParams = useSearchParams()
   const [trackingId, setTrackingId] = useState('')
   const [searchedPackage, setSearchedPackage] = useState<(PackageType & { package_events: PackageEvent[] }) | null>(null)
   const [packages, setPackages] = useState<(PackageType & { package_events: Pick<PackageEvent, 'status' | 'event_time'>[] })[]>([])
@@ -47,6 +50,10 @@ export default function TrackingPage() {
 
   const planeRef = useRef<SVGGElement>(null)
   const pathRef = useRef<SVGPathElement>(null)
+  const routeRevealRef = useScrollReveal<HTMLDivElement>()
+  const scheduleRevealRef = useScrollReveal<HTMLDivElement>()
+  const howToRevealRef = useScrollReveal<HTMLDivElement>()
+  const ctaRevealRef = useScrollReveal<HTMLDivElement>()
 
   const supabase = createClient()
 
@@ -100,9 +107,10 @@ export default function TrackingPage() {
     loadPackages()
   }, [supabase])
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleSearch = useCallback(async (e?: React.FormEvent, explicitId?: string) => {
     e?.preventDefault()
-    if (!trackingId.trim()) return
+    const idToSearch = (explicitId ?? trackingId).trim()
+    if (!idToSearch) return
 
     setIsSearching(true)
     setError(null)
@@ -112,7 +120,7 @@ export default function TrackingPage() {
       const { data, error: fetchError } = await supabase
         .from('packages')
         .select('*, package_events(*)')
-        .eq('tracking_id', trackingId.trim().toUpperCase())
+        .eq('tracking_id', idToSearch.toUpperCase())
         .single()
 
       if (fetchError || !data) {
@@ -126,7 +134,17 @@ export default function TrackingPage() {
     } finally {
       setIsSearching(false)
     }
-  }
+  }, [trackingId, supabase])
+
+  // Deep-link support: /tracking?id=DXB-... auto-fills and searches on load
+  useEffect(() => {
+    const deepLinkId = searchParams.get('id')
+    if (deepLinkId) {
+      setTrackingId(deepLinkId.toUpperCase())
+      handleSearch(undefined, deepLinkId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams])
 
   const getStatusIcon = (status: string) => {
     const icons: Record<string, typeof Package> = {
@@ -275,7 +293,7 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
                 <Input
                   value={trackingId}
                   onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
-                  placeholder="Enter Tracking ID (e.g., TVX-20260330-A7B2)"
+                  placeholder="Enter Tracking ID (e.g., DXB-20260330-A7B2)"
                   className="pl-12 h-14 bg-white/10 border-white/20 text-white placeholder:text-white/40 rounded-2xl text-base font-mono focus:border-purple-400/50 focus:ring-purple-400/20"
                 />
               </div>
@@ -392,8 +410,8 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
 
       {/* Search Results Modal */}
       {showResults && searchedPackage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-gradient-to-r from-[#1B0A2E] to-[#9333EA]">
               <div className="flex items-center gap-3">
@@ -613,13 +631,13 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
 
       {/* ROUTE ANIMATION */}
       <section className="bg-[#1B0A2E] py-20">
-        <div className="max-w-5xl mx-auto px-6 lg:px-12 text-center">
-          <p className="text-purple-400 text-[10px] font-black tracking-[0.22em] uppercase mb-2">Our Route</p>
-          <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-12">
+        <div ref={routeRevealRef} className="max-w-5xl mx-auto px-6 lg:px-12 text-center">
+          <p data-reveal className="text-purple-400 text-[10px] font-black tracking-[0.22em] uppercase mb-2">Our Route</p>
+          <h2 data-reveal className="text-3xl md:text-4xl font-black text-white tracking-tight mb-12">
             Dubai to Zimbabwe
           </h2>
 
-          <div className="max-w-lg mx-auto">
+          <div data-reveal className="max-w-lg mx-auto">
             <div className="flex items-end justify-between px-2 mb-3">
               <div className="text-center">
                 <div className="w-20 h-20 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center mx-auto mb-2 shadow-lg">
@@ -692,8 +710,8 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
 
       {/* FLIGHT SCHEDULES */}
       <section className="bg-white py-20 lg:py-28">
-        <div className="max-w-5xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-14">
+        <div ref={scheduleRevealRef} className="max-w-5xl mx-auto px-6 lg:px-12">
+          <div data-reveal className="text-center mb-14">
             <p className="text-[#9333EA] text-[10px] font-black tracking-[0.22em] uppercase mb-2">Weekly Flights</p>
             <h2 className="text-3xl md:text-4xl font-black text-[#1B0A2E] tracking-tight mb-3">
               Flight Schedules
@@ -707,6 +725,7 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
             {flightSchedules.map((flight, i) => (
               <div
                 key={i}
+                data-reveal
                 className="rounded-3xl border border-gray-100 shadow-xl shadow-slate-200/60 overflow-hidden hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-[#1B0A2E]/12 transition-all duration-300"
               >
                 <div className="h-1 bg-gradient-to-r from-[#1B0A2E] via-[#9333EA] to-purple-400" />
@@ -775,8 +794,8 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
 
       {/* HOW TO TRACK */}
       <section className="bg-slate-50 border-t border-slate-100 py-20 lg:py-28">
-        <div className="max-w-5xl mx-auto px-6 lg:px-12">
-          <div className="text-center mb-14">
+        <div ref={howToRevealRef} className="max-w-5xl mx-auto px-6 lg:px-12">
+          <div data-reveal className="text-center mb-14">
             <p className="text-[#9333EA] text-[10px] font-black tracking-[0.22em] uppercase mb-2">Easy Tracking</p>
             <h2 className="text-3xl md:text-4xl font-black text-[#1B0A2E] tracking-tight mb-3">
               How to Track Your Goods
@@ -790,6 +809,7 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
             {trackingSteps.map((step, i) => (
               <div
                 key={i}
+                data-reveal
                 className="relative bg-white rounded-2xl p-6 border border-slate-100 shadow-md hover:shadow-xl hover:shadow-[#1B0A2E]/08 hover:-translate-y-1 transition-all duration-300"
               >
                 <span className="absolute top-5 right-5 w-7 h-7 rounded-full bg-[#1B0A2E] flex items-center justify-center text-white text-[11px] font-black shadow-sm">
@@ -823,14 +843,14 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
         </div>
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
-        <div className="relative z-10 max-w-3xl mx-auto px-6 lg:px-12 text-center">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-5">
+        <div ref={ctaRevealRef} className="relative z-10 max-w-3xl mx-auto px-6 lg:px-12 text-center">
+          <h2 data-reveal className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight leading-tight mb-5">
             Need Help Tracking<br />Your Package?
           </h2>
           <p className="text-white/50 text-base leading-relaxed mb-10 max-w-md mx-auto">
             Contact us on WhatsApp for instant support with your shipment tracking.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div data-reveal className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href={WHATSAPP_LINK}
               target="_blank"
@@ -850,5 +870,13 @@ const filteredPackageRows = batchRows.filter(({ pkg, status }) => {
         </div>
       </section>
     </main>
+  )
+}
+
+export default function TrackingPage() {
+  return (
+    <Suspense fallback={null}>
+      <TrackingPageInner />
+    </Suspense>
   )
 }

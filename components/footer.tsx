@@ -3,11 +3,8 @@ import Image from "next/image"
 import { Phone, MapPin, ArrowUpRight, Facebook, Instagram } from "lucide-react"
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/services", label: "Our Services" },
-  { href: "/tracking", label: "Flight Schedules & Tracking" },
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
+  { href: "/tracking", label: "Track a Shipment" },
+  { href: "/auth/login", label: "Staff Login" },
 ]
 
 export function Footer() {
